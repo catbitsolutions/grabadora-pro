@@ -212,8 +212,7 @@ object Enhancer {
         for (i in im.indices) im[i] = -im[i]
         fft(re, im)
         val n = re.size
-        for (i in re.indices) { re[i] /= n; im[i] = -im[i] / n }
-    }
+        if (b in 1 until n / 2) { re[n - b] *= g; im[n - b] *= g }
 
     // ------------------------------------------------------------ de-esser ---
     private fun deEss(x: FloatArray, sr: Int): FloatArray {
