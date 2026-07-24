@@ -1,48 +1,97 @@
 package com.example.audiostudio
 
-import android.content.ContentValues
 import android.content.Context
-import android.media.MediaCodec
-import android.media.MediaCodecInfo
-import android.media.MediaFormat
-import android.media.MediaMuxer
-import android.media.MediaScannerConnection
-import android.os.Build
 import android.os.Environment
-import android.provider.MediaStore
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 object Exporter {
 
-    data class Fmt(
-        val label: String,
-        val ext: String,
-        val fileMime: String,
-        val codecMime: String? = null,
-        val container: Int = MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4,
-        val bits: Int = 16,
-        val bitrate: Int = 192_000,
-        val forceRate: Int = 0,
-        val forceMono: Boolean = false
-    )
+    /**
+     * Exporta un archivo PCM crudo a un archivo WAV estándar con encabezado RIFF.
+     */
+    fun exportToWav(pcmFile: File, wavFile: File, sampleRate: Int, channels: Int) {
+        val pcmData = pcmFile.readBytes()
+        val totalAudioLen = pcmData.size.toLong()
+        val totalDataLen = totalAudioLen + 36
+        val byteRate = (sampleRate * channels * 16 / 8).toLong()
 
-    fun formats(): List<Fmt> {
-        val list = mutableListOf(
-            Fmt("WAV 16-bit · sin pérdida", "wav", "audio/wav", bits = 16),
-            Fmt("WAV 24-bit · alta resolución", "wav", "audio/wav", bits = 24),
-            Fmt("M4A/AAC 256 kbps · máxima", "m4a", "audio/mp4", "audio/mp4a-latm", bitrate = 256_000),
-            Fmt("M4A/AAC 192 kbps · alta", "m4a", "audio/mp4", "audio/mp4a-latm", bitrate = 192_000),
-            Fmt("M4A/AAC 128 kbps · normal", "m4a", "audio/mp4", "audio/mp4a-latm", bitrate = 128_000)
-        )
-        if (Build.VERSION.SDK_INT >= 29) {
-            list.add(
-                Fmt("OGG/Opus 128 kbps", "ogg", "audio/ogg", "audio/opus",
-                    MediaMuxer.OutputFormat.MUXER_OUTPUT_OGG, bitrate = 128_000, forceRate = 48000)
-            )
+        val header = ByteArray(44)
+        header[0] = 'R'.code.toByte() // RIFF
+        header[1] = 'I'.code.toByte()
+        header[2] = 'F'.code.toByte()
+        header[3] = 'F'.code.toByte()
+        header[4] = (totalDataLen and 0xff).toByte()
+        header[5] = ((totalDataLen >> 8) and 0xff).toByte()
+        header[6] = ((totalDataLen >> 16) and 0xff).toByte()
+        header[7] = ((totalDataLen >> 24) and 0xff).toByte()
+        header[8] = 'W'.code.toByte() // WAVE
+        header[9] = 'A'.code.toByte()
+        header[10] = 'V'.code.toByte()
+        header[11] = 'E'.code.toByte()
+        header[12] = 'f'.code.toByte() // 'fmt ' chunk
+        header[13] = 'm'.code.toByte()
+        header[14] = 't'.code.toByte()
+        header[15] = ' '.code.toByte()
+        header[16] = 16 // 4 bytes: size of 'fmt ' chunk
+        header[17] = 0
+        header[18] = 0
+        header[19] = 0
+        header[20] = 1 // format = 1 (PCM)
+        header[21] = 0
+        header[22] = channels.toByte()
+        header[23] = 0
+        header[24] = (sampleRate and 0xff).toByte()
+        header[25] = ((sampleRate >> 8) and 0xff).toByte()
+        header[26] = ((sampleRate >> 16) and 0xff).toByte()
+        header[27] = ((sampleRate >> 24) and 0xff).toByte()
+        header[28] = (byteRate and 0xff).toByte()
+        header[29] = ((byteRate >> 8) and 0xff).toByte()
+        header[30] = ((byteRate >> 16) and 0xff).toByte()
+        header[31] = ((byteRate >> 24) and 0xff).toByte()
+        header[32] = (channels * 16 / 8).toByte() // block align
+        header[33] = 0
+        header[34] = 16 // bits per sample
+        header[35] = 0
+        header[36] = 'd'.code.toByte() // data
+        header[37] = 'a'.code.toByte()
+        header[38] = 't'.code.toByte()
+        header[39] = 'a'.code.toByte()
+        header[40] = (totalAudioLen and 0xff).toByte()
+        header[41] = ((totalAudioLen >> 8) and 0xff).toByte()
+        header[42] = ((totalAudioLen >> 16) and 0xff).toByte()
+        header[43] = ((totalAudioLen >> 24) and 0xff).toByte()
+
+        FileOutputStream(wavFile).use { out ->
+            out.write(header)
+            out.write(pcmData)
         }
-        list.add(
-            Fmt("3GP/AMR-WB · voz, mu
+    }
+
+    /**
+     * Guarda el archivo final en la carpeta pública de Descargas de Android
+     * para que el usuario pueda encontrarlo fácilmente.
+     */
+    fun saveToPublicDirectory(context: Context, srcFile: File, fileName: String): File? {
+        val targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        if (!targetDir.exists()) {
+            targetDir.mkdirs()
+        }
+        val destFile = File(targetDir, fileName)
+        return try {
+            FileInputStream(srcFile).use { input ->
+                FileOutputStream(destFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            destFile
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
+}
