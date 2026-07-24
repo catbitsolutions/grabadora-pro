@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <color name="brand">#FF6C4AB6</color>
+    <color name="brand_dark">#FF3F2A70</color>
+    <color name="accent">#FF00C2A8</color>
+    <color name="icon_bg">#FF2B2140</color>
+
+    <style name="Theme.GrabadoraPro" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand</item>
+        <item name="colorPrimaryDark">@color/brand_dark</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="android:statusBarColor" tools:targetApi="21">@color/brand_dark</item>
+    </style>
+</resources>
