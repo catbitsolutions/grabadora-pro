@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Preset:" />
+
+        <Spinner
+            android:id="@+id/spPreset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swDenoise"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Reducción de ruido (FFT)" />
+
+        <TextView
+            android:id="@+id/tvDenoiseVal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Intensidad: media"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbDenoise"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="40" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swHighPass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Quitar retumbe / graves basura" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swHum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quitar zumbido eléctrico" />
+
+        <Spinner
+            android:id="@+id/spHum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swEq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="EQ de remasterización (claridad + aire)" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swVoice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Modo VOZ (si lo apagas: modo MÚSICA)" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swComp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Compresor (volumen parejo)" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swTrim"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recortar silencios del inicio/final" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swNorm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Normalizar volumen a -1 dB" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swFade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Fade in/out suave" />
+    </LinearLayout>
+</ScrollView>
